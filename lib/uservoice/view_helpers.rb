@@ -14,24 +14,18 @@ module Uservoice
     # See https://ACCOUNT.uservoice.com/admin2/docs#/widget for options
     # available.
     #
-    def uservoice_config_javascript(options={})
-      config = Uservoice.config
-      script_key = config[:script_key]
-      subdomain = config[:subdomain]
-      sso_key = config[:sso_key]
-
+    def uservoice_config_javascript(options={})      
       if options[:sso] && options[:sso][:guid]
-        sso_data = options.delete(:sso)
-        options.merge!({:params => {:sso => Uservoice::Token.new(subdomain, sso_key, sso_data).to_s}})
+        options.merge!({:params => {:sso => Uservoice::Token.default(options.delete(:sso)).to_s}})
       end
-
+      
       script = <<-EOS
         <script type=\"text/javascript\">
           var uvOptions = #{options.to_json};
           (function() {
             var uv = document.createElement('script');
             uv.type = 'text/javascript'; uv.async = true;
-            uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'widget.uservoice.com/#{script_key}.js';
+            uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'widget.uservoice.com/#{Uservoice.config[:script_key]}.js';
             var s = document.getElementsByTagName('script')[0];
             s.parentNode.insertBefore(uv, s);
           })();

@@ -23,6 +23,17 @@ module Uservoice
 
       @data = CGI.escape(Base64.encode64(encrypted_data).gsub(/\n/, ''))
     end
+    
+    def self.default(options)
+      config = Uservoice.config
+      subdomain = config[:subdomain]
+      sso_key = config[:sso_key]
+
+      if options[:sso] && options[:sso][:guid]
+        sso_data = options.delete(:sso)
+        Uservoice::Token.new(subdomain, sso_key, sso_data)
+      end
+    end    
 
     def to_s #:nodoc:
       @data
